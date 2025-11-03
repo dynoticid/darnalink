@@ -44,6 +44,26 @@ h1{
 .back-btn:hover{
   background: rgba(255,255,255,0.12);
 }
+.search-box{
+  width:100%;
+  max-width:650px;
+  margin-bottom:20px;
+  display:flex;
+  justify-content:center;
+}
+.search-box input{
+  width:100%;
+  padding:12px 16px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  font-size:1rem;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  transition:0.3s;
+}
+.search-box input::placeholder{color:rgba(255,255,255,0.7);}
+.search-box input:focus{background:rgba(255,255,255,0.2);}
 .card{
   width:100%;
   max-width:650px;
@@ -84,7 +104,29 @@ th{
 .status-takedown .dot { color: #ff8c00; } 
 .status-process .dot { color: #ffea00; }   
 .status-rejected .dot { color: #ff0033; }  
-
+.smartlink{
+  color:#38bdf8;
+  font-weight:600;
+  text-decoration:underline;
+  cursor:default;
+}
+.pagination{
+  margin-top:20px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+.page-btn{
+  cursor:pointer;
+  padding:6px 14px;
+  border-radius:12px;
+  background: rgba(255,255,255,0.1);
+  font-weight:600;
+  transition:0.2s;
+}
+.page-btn:hover{
+  background: rgba(255,255,255,0.2);
+}
 footer{
   margin-top:20px;
   color:rgba(255,255,255,0.6);
@@ -102,6 +144,10 @@ footer{
 
 <a href="https://dynoticid.github.io/smartlink/" class="back-btn">Back to Artists</a>
 
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Cari lagu...">
+</div>
+
 <div class="card">
   <table>
     <thead>
@@ -111,16 +157,18 @@ footer{
         <th>Smartlink</th>
       </tr>
     </thead>
-    <tbody id="table-body">
-      <!-- Data akan diisi oleh JS -->
-    </tbody>
+    <tbody id="table-body"></tbody>
   </table>
+
+  <div class="pagination">
+    <span class="page-btn" id="prevBtn">Prev</span>
+    <span class="page-btn" id="nextBtn">Next</span>
+  </div>
 </div>
 
 <footer>© 2025 Dynotic ID</footer>
 
 <script>
-// Lagu terbaru di atas, posisi pertama ABG TUA
 const songs = [
   {title:"ABG TUA", status:"approve"},
   {title:"BECAK MAFIA SMOKE", status:"approve"},
@@ -134,19 +182,50 @@ const songs = [
   {title:"Jangan Ganggu Pacarku", status:"approve"}
 ];
 
-function renderTable(){
+let filteredSongs = [...songs];
+let currentPage = 1;
+const rowsPerPage = 5;
+
+function renderTable() {
   const tableBody = document.getElementById("table-body");
   tableBody.innerHTML = "";
-  songs.forEach(song=>{
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const pageSongs = filteredSongs.slice(start, end);
+
+  pageSongs.forEach(song => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${song.title}</td>
-      <td><span class="status-text status-${song.status}">${song.status.charAt(0).toUpperCase() + song.status.slice(1)}<span class="dot">•</span></span></td>
-      <td>Not Available</td>
+      <td><span class="status-text status-${song.status}">
+        ${song.status.charAt(0).toUpperCase() + song.status.slice(1)}
+        <span class="dot">•</span></span></td>
+      <td><span class="smartlink">Link</span></td>
     `;
     tableBody.appendChild(row);
   });
 }
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  const keyword = e.target.value.toLowerCase();
+  filteredSongs = songs.filter(song => song.title.toLowerCase().includes(keyword));
+  currentPage = 1;
+  renderTable();
+});
+
+document.getElementById("prevBtn").addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    renderTable();
+  }
+});
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+  if (currentPage * rowsPerPage < filteredSongs.length) {
+    currentPage++;
+    renderTable();
+  }
+});
 
 renderTable();
 </script>
